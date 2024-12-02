@@ -41,7 +41,6 @@ export default function SignIn({navigation}: any) {
   const {
     control,
     handleSubmit,
-    register,
     formState: {errors},
   } = useForm<any>({
     defaultValues: {
@@ -57,16 +56,11 @@ export default function SignIn({navigation}: any) {
     console.log('renderizou');
   });
 
-  useEffect(() => {
-    register('email');
-    register('senha');
-  }, [register]);
-
   async function entrar(data: Credencial) {
     console.log(JSON.stringify(data));
     const mensagem = await signIn(data);
     if (mensagem === 'ok') {
-      navigation.navigate('Home');
+      navigation.navigate('AppStack');
     } else {
       Alert.alert('Erro', mensagem);
     }
@@ -82,7 +76,7 @@ export default function SignIn({navigation}: any) {
         <>
           <Image
             style={styles.image}
-            source={require('../assets/logo512.png')}
+            source={require('../assets/images/logo512.png')}
           />
           <Controller
             control={control}
@@ -166,7 +160,7 @@ const styles = StyleSheet.create({
   textinput: {
     width: 350,
     height: 50,
-    marginBottom: 20,
+    marginTop: 20,
     backgroundColor: 'transparent',
   },
   textEsqueceuSenha: {

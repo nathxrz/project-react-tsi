@@ -15,7 +15,26 @@ export const AuthProvider = ({children}: any) => {
       return 'ok';
     } catch (error) {
       console.error(error);
-      return 'deu bug';
+      return launchServerMessageErro(error);
+    }
+  }
+
+  function launchServerMessageErro(e: any): string {
+    switch (e.code) {
+      case 'auth/invalid-credential':
+        return 'E-mail ou senha incorreto.';
+      case 'auth/user-not-found':
+        return 'Usuário não cadastrado.';
+      case 'auth/wrong-password':
+        return 'Senha incorreta.';
+      case 'auth/invalid-email':
+        return 'E-mail incorreto.';
+      case 'auth/user-disabled':
+        return 'Usuário desabilitado.';
+      case 'auth/email-already-in-use':
+        return 'Esse e-mail já está cadastrado.';
+      default:
+        return 'Erro desconhecido. Contate o administrador';
     }
   }
 
