@@ -6,8 +6,8 @@ import React from 'react';
 import {StatusBar} from 'react-native';
 import {Icon, useTheme} from 'react-native-paper';
 import Home from '../screens/Home';
-import SignIn from '../screens/SingIn';
-import Preload from '../screens/Preload';
+import SignIn from '../screens/SignIn';
+import SignUp from '../screens/SignUp';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -15,12 +15,12 @@ const Tab = createBottomTabNavigator();
 function AuthStack() {
   return (
     <Stack.Navigator
-      initialRouteName="Preload"
+      initialRouteName="SignIn"
       screenOptions={{
         headerShown: false,
       }}>
-      <Stack.Screen name="Preload" component={Preload} />
       <Stack.Screen name="SignIn" component={SignIn} />
+      <Stack.Screen name="SignUp" component={SignUp} />
     </Stack.Navigator>
   );
 }

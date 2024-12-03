@@ -1,5 +1,5 @@
 import {yupResolver} from '@hookform/resolvers/yup';
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {Alert, Image, ScrollView, StyleSheet, View} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
@@ -50,11 +50,10 @@ export default function SignIn({navigation}: any) {
     mode: 'onSubmit',
     resolver: yupResolver(schema),
   });
-  const {signIn} = useContext<any>(AuthContext);
 
-  useEffect(() => {
-    console.log('renderizou');
-  });
+  const [showPassword, setDisplayPassword] = useState(true);
+
+  const {signIn} = useContext<any>(AuthContext);
 
   async function entrar(data: Credencial) {
     console.log(JSON.stringify(data));
@@ -113,11 +112,11 @@ export default function SignIn({navigation}: any) {
                 mode="outlined"
                 label="Senha"
                 placeholder="Digite sua senha"
-                secureTextEntry
+                secureTextEntry={showPassword}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                right={<TextInput.Icon icon="eye" />}
+                right={<TextInput.Icon icon="eye" onPress={() => setDisplayPassword(previus => !previus)}/>}
               />
             )}
             name="senha"
@@ -136,7 +135,11 @@ export default function SignIn({navigation}: any) {
             Entrar
           </Button>
           <View style={styles.divCadastro}>
-            <Text style={styles.textCadastro}>Cadastrar-se?</Text>
+            <Text
+              style={styles.textCadastro}
+              onPress={() => navigation.navigate('SignUp')}>
+              Cadastrar-se?
+            </Text>
           </View>
         </>
       </ScrollView>
@@ -150,10 +153,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 200,
+    width: 300,
     height: 200,
     alignSelf: 'center',
-    borderRadius: 200 / 2,
+    // borderRadius: 200 / 2,
     marginTop: 100,
     marginBottom: 40,
   },

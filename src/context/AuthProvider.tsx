@@ -1,6 +1,9 @@
-import auth from '@react-native-firebase/auth';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import React, {createContext} from 'react';
+// import EncryptedStorage from 'react-native-encrypted-storage';
 import {Credencial} from '../model/types';
+import {User} from '../model/User';
 
 export const AuthContext = createContext({});
 
@@ -16,6 +19,27 @@ export const AuthProvider = ({children}: any) => {
     } catch (error) {
       console.error(error);
       return launchServerMessageErro(error);
+    }
+  }
+
+  async function signUp(user: User): Promise<string> {
+    try {
+      await auth().createUserWithEmailAndPassword(user.email, user.password);
+      await auth().currentUser?.sendEmailVerification();
+      const usuarioFirestore = {
+        name: user.name,
+        surname: user.surname,
+        phone: user.phone,
+        email: user.email,
+        // urlFoto: user.urlFoto,
+      };
+      await firestore()
+        .collection('usuarios')
+        .doc(auth().currentUser?.uid)
+        .set(usuarioFirestore);
+      return 'ok';
+    } catch (e) {
+      return launchServerMessageErro(e);
     }
   }
 
@@ -39,6 +63,6 @@ export const AuthProvider = ({children}: any) => {
   }
 
   return (
-    <AuthContext.Provider value={{signIn}}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{signIn, signUp}}>{children}</AuthContext.Provider>
   );
 };

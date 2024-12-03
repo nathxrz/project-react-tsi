@@ -15,7 +15,7 @@ export default function Preload({navigation}: any) {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{name: 'AppStack'}],
+            routes: [{name: 'SignIn'}],
           }),
         );
       } else {
@@ -37,6 +37,7 @@ export default function Preload({navigation}: any) {
       }),
     );
   }
+
   return (
     <View
       style={{...styles.container, backgroundColor: theme.colors.background}}>
