@@ -3,7 +3,7 @@ export class User {
   public name: string;
   public phone: string;
   public email: string;
-//   public urlFoto: string;
+  //   public urlFoto: string;
   public password: string;
   constructor(
     uid: string,
