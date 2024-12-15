@@ -6,20 +6,18 @@ import {Button, TextInput, useTheme} from 'react-native-paper';
 import {Controller, useForm} from 'react-hook-form';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {AuthContext} from '../context/AuthProvider';
-import { User } from '../model/User';
+import {User} from '../model/User';
 
 const requiredMessage = 'Campo obrigatório';
 
 const schema = yup
   .object()
   .shape({
-    name: yup
-    .string()
-    .required(requiredMessage),
+    name: yup.string().required(requiredMessage),
     phone: yup
-    .string()
-    .required(requiredMessage)
-    .length(11, 'Telefone inválido'),
+      .string()
+      .required(requiredMessage)
+      .length(11, 'Telefone inválido'),
     email: yup
       .string()
       .required(requiredMessage)
@@ -53,12 +51,16 @@ export default function SignUp({navigation}: any) {
 
   const [showPassword, setDisplayPassword] = useState(true);
   const {signUp} = useContext<any>(AuthContext);
+  const [requesting, setRequest] = useState(false);
 
   async function cadastrar(data: User) {
+    setRequest(true);
     const message = await signUp(data);
-    if (message === 'ok') {
+    if (message === 'success') {
+      setRequest(false);
       navigation.navigate('SignIn');
     } else {
+      setRequest(false);
       Alert.alert('Erro', message);
     }
   }
@@ -163,7 +165,12 @@ export default function SignUp({navigation}: any) {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                right={<TextInput.Icon icon="eye" onPress={() => setDisplayPassword(previus => !previus)} />}
+                right={
+                  <TextInput.Icon
+                    icon="eye"
+                    onPress={() => setDisplayPassword(previus => !previus)}
+                  />
+                }
               />
             )}
             name="password"
@@ -177,8 +184,10 @@ export default function SignUp({navigation}: any) {
           <Button
             style={styles.button}
             mode="contained"
+            loading={requesting}
+            disabled={requesting}
             onPress={handleSubmit(cadastrar)}>
-            Cadastrar-se
+            {!requesting ? 'Cadastrar-se' : 'Cadastrando'}
           </Button>
         </>
       </ScrollView>

@@ -52,15 +52,17 @@ export default function SignIn({navigation}: any) {
   });
 
   const [showPassword, setDisplayPassword] = useState(true);
-
+  const [requesting, setRequest] = useState(false);
   const {signIn} = useContext<any>(AuthContext);
 
   async function entrar(data: Credencial) {
-    console.log(JSON.stringify(data));
+    setRequest(true);
     const mensagem = await signIn(data);
-    if (mensagem === 'ok') {
+    if (mensagem === 'success') {
+      setRequest(false);
       navigation.navigate('AppStack');
     } else {
+      setRequest(false);
       Alert.alert('Erro', mensagem);
     }
   }
@@ -116,7 +118,12 @@ export default function SignIn({navigation}: any) {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                right={<TextInput.Icon icon="eye" onPress={() => setDisplayPassword(previus => !previus)}/>}
+                right={
+                  <TextInput.Icon
+                    icon="eye"
+                    onPress={() => setDisplayPassword(previus => !previus)}
+                  />
+                }
               />
             )}
             name="senha"
@@ -127,12 +134,18 @@ export default function SignIn({navigation}: any) {
             </Text>
           )}
 
-          <Text style={styles.textEsqueceuSenha}>Esqueceu sua senha?</Text>
+          <Text
+            style={styles.textEsqueceuSenha}
+            onPress={() => navigation.navigate('ForgotPassword')}>
+            Esqueceu sua senha?
+          </Text>
           <Button
             style={styles.button}
             mode="contained"
-            onPress={handleSubmit(entrar)}>
-            Entrar
+            onPress={handleSubmit(entrar)}
+            loading={requesting}
+            disabled={requesting}>
+            {!requesting ? 'Entrar' : 'Entrando'}
           </Button>
           <View style={styles.divCadastro}>
             <Text

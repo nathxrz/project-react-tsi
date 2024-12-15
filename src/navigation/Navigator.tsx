@@ -6,8 +6,12 @@ import React from 'react';
 import {StatusBar} from 'react-native';
 import {Icon, useTheme} from 'react-native-paper';
 import Home from '../screens/Home';
+import Menu from '../screens/Menu';
 import SignIn from '../screens/SignIn';
 import SignUp from '../screens/SignUp';
+import Preload from '../screens/Preload';
+import ForgotPassword from '../screens/ForgotPassword';
+import Profile from '../screens/Profile';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -15,12 +19,14 @@ const Tab = createBottomTabNavigator();
 function AuthStack() {
   return (
     <Stack.Navigator
-      initialRouteName="SignIn"
+      initialRouteName="Preload"
       screenOptions={{
         headerShown: false,
       }}>
+      <Stack.Screen name="Preload" component={Preload} />
       <Stack.Screen name="SignIn" component={SignIn} />
       <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
     </Stack.Navigator>
   );
 }
@@ -47,6 +53,20 @@ function AppStack() {
           ),
         }}
       />
+      <Tab.Screen
+        component={Menu}
+        name="Menu"
+        options={{
+          tabBarLabel: 'Menu',
+          tabBarIcon: () => (
+            <Icon
+              source="account-group"
+              color={theme.colors.primary}
+              size={20}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -64,6 +84,7 @@ export default function Navigator() {
         }}>
         <Stack.Screen name="AuthStack" component={AuthStack} />
         <Stack.Screen name="AppStack" component={AppStack} />
+        <Stack.Screen component={Profile} name="Profile" />
       </Stack.Navigator>
     </NavigationContainer>
   );

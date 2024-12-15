@@ -1,23 +1,65 @@
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import React, {createContext} from 'react';
+import React, {createContext, useState} from 'react';
 // import EncryptedStorage from 'react-native-encrypted-storage';
 import {Credencial} from '../model/types';
 import {User} from '../model/User';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 export const AuthContext = createContext({});
 
 export const AuthProvider = ({children}: any) => {
+  const [userAuth, setUserAuth] = useState<FirebaseAuthTypes.User | null>(null);
+
+  async function saveCredentials(credencial: Credencial): Promise<void> {
+    if (credencial) {
+      try {
+        await EncryptedStorage.setItem(
+          'credencial',
+          JSON.stringify(credencial),
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  async function getCredentials(): Promise<Credencial | null> {
+    try {
+      const credencial = await EncryptedStorage.getItem('credencial');
+      return credencial ? JSON.parse(credencial) : null;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  async function removeCredentials(): Promise<void> {
+    try {
+      await EncryptedStorage.removeItem('credencial');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   async function signIn(credencial: Credencial) {
-    console.log('Entrar', credencial);
     try {
       await auth().signInWithEmailAndPassword(
         credencial.email,
         credencial.senha,
       );
-      return 'ok';
+
+      const currentUser = auth().currentUser;
+
+      if (currentUser?.emailVerified) {
+        setUserAuth(currentUser);
+        await saveCredentials(credencial);
+        return 'success';
+      } else {
+        await auth().signOut();
+        return 'E-mail não verificado. Verifique seu e-mail.';
+      }
     } catch (error) {
-      console.error(error);
       return launchServerMessageErro(error);
     }
   }
@@ -28,17 +70,38 @@ export const AuthProvider = ({children}: any) => {
       await auth().currentUser?.sendEmailVerification();
       const usuarioFirestore = {
         name: user.name,
-        surname: user.surname,
         phone: user.phone,
         email: user.email,
-        // urlFoto: user.urlFoto,
       };
       await firestore()
         .collection('usuarios')
         .doc(auth().currentUser?.uid)
         .set(usuarioFirestore);
-      return 'ok';
+      return 'success';
     } catch (e) {
+      return launchServerMessageErro(e);
+    }
+  }
+
+  async function signOut(): Promise<string> {
+    try {
+      setUserAuth(null);
+      if (auth().currentUser) {
+        await auth().signOut();
+        await removeCredentials();
+      }
+      return 'success';
+    } catch (e) {
+      return launchServerMessageErro(e);
+    }
+  }
+
+  async function recoverPassword(email: string): Promise<string> {
+    try {
+      await auth().sendPasswordResetEmail(email);
+      return 'success';
+    } catch (e) {
+      console.error(e);
       return launchServerMessageErro(e);
     }
   }
@@ -63,6 +126,17 @@ export const AuthProvider = ({children}: any) => {
   }
 
   return (
-    <AuthContext.Provider value={{signIn, signUp}}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        userAuth,
+        setUserAuth,
+        signIn,
+        signUp,
+        signOut,
+        recoverPassword,
+        getCredentials,
+      }}>
+      {children}
+    </AuthContext.Provider>
   );
 };

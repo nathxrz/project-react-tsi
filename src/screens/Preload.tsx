@@ -1,74 +1,87 @@
 import auth from '@react-native-firebase/auth';
 import {CommonActions} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {Image, StyleSheet, View} from 'react-native';
-import {Dialog, Text, useTheme} from 'react-native-paper';
+import {useTheme} from 'react-native-paper';
+import {AuthContext} from '../context/AuthProvider';
+import {UserContext} from '../context/UserProvider';
 
 export default function Preload({navigation}: any) {
   const theme = useTheme();
-  const [visibleDialog, setVisibleDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(String);
+
+  const {setUserAuth, getCredentials, signIn} = useContext<any>(AuthContext);
+  const {getUser} = useContext<any>(UserContext);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(user => {
+    const unsubscribe = auth().onAuthStateChanged(async user => {
       if (user) {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{name: 'SignIn'}],
-          }),
-        );
+        await searchUser();
       } else {
-        setErrorMessage('Você precisa verificar seu e-mail antes de continuar');
-        setVisibleDialog(true);
+        goSignIn();
       }
     });
     return () => {
       unsubscribe();
     };
-  }, [navigation]);
+  });
 
-  function goSignIn() {
-    setVisibleDialog(false);
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: 'SignIn'}],
-      }),
-    );
+  async function searchUser() {
+    const user = await getUser();
+    if (user) {
+      setUserAuth(user);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'AppStack'}],
+        }),
+      );
+    }
   }
 
-  return (
-    <View
-      style={{...styles.container, backgroundColor: theme.colors.background}}>
-      <Image
-        style={styles.imagem}
-        source={require('../assets/images/logo512.png')}
-        accessibilityLabel="logo do app"
-      />
-      <Dialog visible={visibleDialog} onDismiss={goSignIn}>
-        <Dialog.Icon icon="alert-circle-outline" size={60} />
-        <Dialog.Title style={styles.textDialog}>Erro</Dialog.Title>
-        <Dialog.Content>
-          <Text style={styles.textDialog} variant="bodyLarge">
-            {errorMessage}
-          </Text>
-        </Dialog.Content>
-      </Dialog>
-    </View>
-  );
-}
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imagem: {
-    width: 250,
-    height: 250,
-  },
-  textDialog: {
-    textAlign: 'center',
-  },
-});
+  async function goSignIn() {
+    const credencial = await getCredentials();
+    if (credencial !== null) {
+      const logged = await signIn(credencial);
+      if (logged === 'success') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'AppStack'}],
+          }),
+        );
+      }
+    }else{
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'SignIn'}],
+        }),
+      );
+    }
+  }
+
+    return (
+      <View
+        style={{...styles.container, backgroundColor: theme.colors.background}}>
+        <Image
+          style={styles.imagem}
+          source={require('../assets/images/logo512.png')}
+          accessibilityLabel="logo do app"
+        />
+      </View>
+    );
+  }
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    imagem: {
+      width: 250,
+      height: 250,
+    },
+    textDialog: {
+      textAlign: 'center',
+    },
+  });
