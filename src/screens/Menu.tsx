@@ -1,16 +1,7 @@
-// import {CommonActions} from '@react-navigation/native';
 import React, {useContext, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {
-  //   Button,
-  Dialog,
-  //   Divider,
-  List,
-  Text,
-  useTheme,
-} from 'react-native-paper';
+import {Dialog, List, Text, useTheme} from 'react-native-paper';
 import {AuthContext} from '../context/AuthProvider';
-// import {Background} from '@react-navigation/elements';
 
 export default function Menu({navigation}: any) {
   const theme = useTheme();
@@ -33,6 +24,11 @@ export default function Menu({navigation}: any) {
         title="Perfil"
         left={() => <List.Icon color={theme.colors.primary} icon="account" />}
         onPress={() => navigation.navigate('Profile')}
+      />
+      <List.Item
+        title="Alterar senha"
+        left={() => <List.Icon color={theme.colors.primary} icon="lock" />}
+        onPress={() => navigation.navigate('ChangeUserPassword')}
       />
       <List.Item
         title="Sair"

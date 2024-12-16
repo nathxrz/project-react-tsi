@@ -12,6 +12,7 @@ import SignUp from '../screens/SignUp';
 import Preload from '../screens/Preload';
 import ForgotPassword from '../screens/ForgotPassword';
 import Profile from '../screens/Profile';
+import ChangeUserPassword from '../screens/ChangeUserPassword';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,6 +86,10 @@ export default function Navigator() {
         <Stack.Screen name="AuthStack" component={AuthStack} />
         <Stack.Screen name="AppStack" component={AppStack} />
         <Stack.Screen component={Profile} name="Profile" />
+        <Stack.Screen
+          component={ChangeUserPassword}
+          name="ChangeUserPassword"
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -48,7 +48,7 @@ export default function ForgotPassword({navigation}: any) {
     } else {
       setRequest(false);
       setDialogVisible(true);
-      setMessage({tipo: 'Erro:', message: msg});
+      setMessage({tipo: 'Atenção:', message: msg});
     }
   }
 

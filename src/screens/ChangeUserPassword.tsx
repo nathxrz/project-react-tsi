@@ -1,94 +1,88 @@
 import {yupResolver} from '@hookform/resolvers/yup';
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Image, ScrollView, StyleSheet} from 'react-native';
+import {Image, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import {Button, Dialog, Text, TextInput, useTheme} from 'react-native-paper';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import * as yup from 'yup';
 import {AuthContext} from '../context/AuthProvider';
-import {User} from '../model/User';
-import {UserContext} from '../context/UserProvider';
-import {CommonActions} from '@react-navigation/native';
-
 const requiredMessage = 'Campo obrigatório';
 
 const schema = yup
   .object()
   .shape({
-    name: yup
+    senha: yup
       .string()
       .required(requiredMessage)
-      .min(2, 'O nome deve ter ao menos 2 caracteres'),
-    phone: yup
+      .matches(
+        /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[$*&@#])[0-9a-zA-Z$*&@#]{8,}$/,
+        'A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um númeral, um caractere especial e um total de 8 caracteres',
+      ),
+    senha_nova: yup
       .string()
       .required(requiredMessage)
-      .length(11, 'Telefone inválido'),
+      .matches(
+        /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[$*&@#])[0-9a-zA-Z$*&@#]{8,}$/,
+        'A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um númeral, um caractere especial e um total de 8 caracteres',
+      ),
+    confirmar_senha: yup
+      .string()
+      .required(requiredMessage)
+      .equals([yup.ref('senha_nova')], 'As senhas não conferem'),
   })
   .required();
 
-export default function Profile({navigation}: any) {
+export default function ChangeUserPassword() {
   const theme = useTheme();
-  const {userAuth} = useContext<any>(AuthContext);
-  const {updateUser, removeUser} = useContext<any>(UserContext);
+  const {userAuth, signIn, changePassword} = useContext<any>(AuthContext);
+  const [requesting, setRequest] = useState(false);
   const [message, setMessage] = useState({type: '', message: ''});
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogVisibleRemove, setDialogVisibleRemove] = useState(false);
-  const [requesting, setRequest] = useState(false);
+  const [showCurrentPassword, setDisplayCurrentPassword] = useState(true);
+  const [showNewPassword, setDisplayNewPassword] = useState(true);
+  const [showPasswordConfirmation, setDisplayPasswordConfirmation] = useState(true);
 
   const {
-    control,
     handleSubmit,
-    register,
+    control,
     formState: {errors},
   } = useForm<any>({
     defaultValues: {
-      name: userAuth.name,
-      email: userAuth.email,
-      phone: userAuth.phone,
+      senha: '',
+      senha_nova: '',
+      confirmar_senha: '',
     },
     mode: 'onSubmit',
     resolver: yupResolver(schema),
   });
 
-  useEffect(() => {
-    register('name');
-    register('email');
-    register('phone');
-  }, [register]);
-
-  async function update(data: User) {
+  async function onSubmit(data: {
+    senha: string;
+    senha_nova: string;
+    confirmar_senha: string;
+  }) {
     setRequest(true);
-    const updated = await updateUser(data);
-    if (updated === 'success') {
-      setMessage({type: 'success', message: 'Usuário atualizado com sucesso'});
-      setDialogVisible(true);
+    const logged = await signIn({email: userAuth.email, senha: data.senha});
+    if (logged !== 'success') {
       setRequest(false);
-    } else {
-      setMessage({type: 'erro', message: updated});
+      setMessage({type: 'erro', message: 'Senha atual incorreta'});
       setDialogVisible(true);
-      setRequest(false);
+      return;
     }
-  }
-
-  async function alertRemove() {
-    setDialogVisibleRemove(true);
-  }
-
-  async function remove() {
-    setDialogVisibleRemove(false);
-    const removed = await removeUser(userAuth.uid);
-    if (removed === 'success') {
-      setMessage({type: 'success', message: 'Usuário removido com sucesso'});
-      setDialogVisible(true);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{name: 'AuthStack'}],
-        }),
-      );
+    if (data.senha_nova === data.confirmar_senha) {
+      const changedPassword = await changePassword(data.senha_nova);
+      if (changedPassword === 'success') {
+        setDialogVisible(true);
+        setMessage({type: 'success', message: 'Senha alterada com sucesso'});
+        setRequest(false);
+      } else {
+        setRequest(false);
+        setMessage({type: 'erro', message: changedPassword});
+        setDialogVisible(true);
+      }
     } else {
-      setMessage({type: 'erro', message: removed});
-      setDialogVisibleRemove(true);
+      setRequest(false);
+      setMessage({type: 'erro', message: 'As senhas não conferem'});
+      setDialogVisible(true);
     }
   }
 
@@ -106,71 +100,86 @@ export default function Profile({navigation}: any) {
             render={({field: {onChange, onBlur, value}}) => (
               <TextInput
                 style={styles.textinput}
-                label="Nome"
-                placeholder="Digite seu nome completo"
+                label="Senha Atual"
+                placeholder="Digite sua senha atual"
                 mode="outlined"
-                autoCapitalize="words"
+                autoCapitalize="none"
+                secureTextEntry={showCurrentPassword}
                 returnKeyType="next"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                right={<TextInput.Icon icon="smart-card" />}
+                right={
+                  <TextInput.Icon
+                    icon="eye"
+                    onPress={() => setDisplayCurrentPassword(previus => !previus)}
+                  />
+                }
               />
             )}
-            name="name"
+            name="senha"
           />
-          {errors.name && (
+          {errors.senha && (
             <Text style={{...styles.textError, color: theme.colors.error}}>
-              {errors.name?.message?.toString()}
+              {errors.senha?.message?.toString()}
             </Text>
           )}
-
           <Controller
             control={control}
             render={({field: {onChange, onBlur, value}}) => (
               <TextInput
                 style={styles.textinput}
-                label="Telefone"
-                placeholder="Digite seu telefone"
+                label="Senha nova"
+                placeholder="Digite sua nova senha"
                 mode="outlined"
-                autoCapitalize="words"
+                autoCapitalize="none"
                 returnKeyType="next"
+                secureTextEntry={showNewPassword}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                right={<TextInput.Icon icon="phone" />}
+                right={
+                  <TextInput.Icon
+                    icon="eye"
+                    onPress={() => setDisplayNewPassword(previus => !previus)}
+                  />
+                }
               />
             )}
-            name="phone"
+            name="senha_nova"
           />
-          {errors.phone && (
+          {errors.senha_nova && (
             <Text style={{...styles.textError, color: theme.colors.error}}>
-              {errors.phone?.message?.toString()}
+              {errors.senha_nova?.message?.toString()}
             </Text>
           )}
-
           <Controller
             control={control}
             render={({field: {onChange, onBlur, value}}) => (
               <TextInput
                 style={styles.textinput}
-                label="E-mail"
-                placeholder="Digite seu e-mail"
+                label="Confirmar senha"
+                placeholder="Confirme sua senha"
                 mode="outlined"
-                autoCapitalize="words"
-                returnKeyType="next"
+                autoCapitalize="none"
+                returnKeyType="go"
+                secureTextEntry={showPasswordConfirmation}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                disabled={true}
-                right={<TextInput.Icon icon="email" />}
+                right={
+                  <TextInput.Icon
+                    icon="eye"
+                    onPress={() => setDisplayPasswordConfirmation(previus => !previus)}
+                  />
+                }
               />
             )}
-            name="email"
+            name="confirmar_senha"
           />
-          {errors.email && (
+          {errors.confirmar_senha && (
             <Text style={{...styles.textError, color: theme.colors.error}}>
-              {errors.email?.message?.toString()}
+              {errors.confirmar_senha?.message?.toString()}
             </Text>
           )}
 
@@ -179,15 +188,9 @@ export default function Profile({navigation}: any) {
             mode="contained"
             loading={requesting}
             disabled={requesting}
-            onPress={handleSubmit(update)}>
-            {!requesting ? 'Salvar informações' : 'Salvando'}
+            onPress={handleSubmit(onSubmit)}>
+            {!requesting ? 'Redefinir senha' : 'Redefinindo'}
           </Button>
-
-          <Text
-            style={styles.textRemoveAccount}
-            onPress={handleSubmit(alertRemove)}>
-            Excluir conta
-          </Text>
         </>
       </ScrollView>
 
@@ -212,26 +215,6 @@ export default function Profile({navigation}: any) {
             {message.message}
           </Text>
         </Dialog.Content>
-      </Dialog>
-
-      <Dialog
-        visible={dialogVisibleRemove}
-        onDismiss={() => {
-          setDialogVisibleRemove(false);
-        }}>
-        <Dialog.Icon icon={'alert-circle-outline'} size={60} />
-        <Dialog.Title style={styles.textDialog}>{'Atenção'}</Dialog.Title>
-        <Dialog.Content>
-          <Text style={styles.textDialog} variant="bodyLarge">
-            {'Você tem certeza que deseja excluir sua conta?'}
-          </Text>
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={() => setDialogVisibleRemove(false)}>
-            Cancelar
-          </Button>
-          <Button onPress={remove}>Excluir</Button>
-        </Dialog.Actions>
       </Dialog>
     </SafeAreaView>
   );

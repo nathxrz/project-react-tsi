@@ -51,13 +51,12 @@ export const AuthProvider = ({children}: any) => {
       const currentUser = auth().currentUser;
 
       if (currentUser?.emailVerified) {
-
         setUserAuth(currentUser);
         await saveCredentials(credencial);
         return 'success';
       } else {
         await auth().signOut();
-        return 'E-mail não verificado. Verifique seu e-mail.';
+        return 'E-mail não verificado.';
       }
     } catch (error) {
       return launchServerMessageErro(error);
@@ -101,7 +100,15 @@ export const AuthProvider = ({children}: any) => {
       await auth().sendPasswordResetEmail(email);
       return 'success';
     } catch (e) {
-      console.error(e);
+      return launchServerMessageErro(e);
+    }
+  }
+
+  async function changePassword(newPassword: string): Promise<string> {
+    try {
+      await auth().currentUser?.updatePassword(newPassword);
+      return 'success';
+    } catch (e) {
       return launchServerMessageErro(e);
     }
   }
@@ -110,10 +117,10 @@ export const AuthProvider = ({children}: any) => {
     switch (e.code) {
       case 'auth/user-not-found':
         return 'Usuário não cadastrado.';
-        case 'auth/invalid-credential':
-          return 'E-mail ou senha incorreto.';
-        case 'auth/wrong-password':
-          return 'Senha incorreta.';
+      case 'auth/invalid-credential':
+        return 'E-mail ou senha incorreto.';
+      case 'auth/wrong-password':
+        return 'Senha incorreta.';
       case 'auth/invalid-email':
         return 'E-mail incorreto.';
       case 'auth/user-disabled':
@@ -135,7 +142,8 @@ export const AuthProvider = ({children}: any) => {
         signOut,
         recoverPassword,
         getCredentials,
-        removeCredentials
+        removeCredentials,
+        changePassword,
       }}>
       {children}
     </AuthContext.Provider>

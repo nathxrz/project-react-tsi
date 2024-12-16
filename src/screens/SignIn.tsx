@@ -7,7 +7,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import * as yup from 'yup';
 import {AuthContext} from '../context/AuthProvider';
 import {Credencial} from '../model/types';
-import { CommonActions } from '@react-navigation/native';
+import {CommonActions} from '@react-navigation/native';
 
 const requiredMessage = 'Campo obrigatório';
 
@@ -69,7 +69,7 @@ export default function SignIn({navigation}: any) {
       );
     } else {
       setRequest(false);
-      Alert.alert('Erro', mensagem);
+      Alert.alert('Atenção', mensagem);
     }
   }
 
