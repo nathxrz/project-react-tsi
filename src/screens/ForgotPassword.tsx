@@ -100,7 +100,7 @@ export default function ForgotPassword({navigation}: any) {
         }}>
         <Dialog.Icon icon="alert-circle-outline" size={60} />
         <Dialog.Title style={styles.textDialog}>
-          {message.tipo === 'success' ? 'Informação' : 'Atenção'}
+          {message.tipo === 'success' ? 'Parabéns' : 'Atenção'}
         </Dialog.Title>
         <Dialog.Content>
           <Text style={styles.textDialog} variant="bodyLarge">

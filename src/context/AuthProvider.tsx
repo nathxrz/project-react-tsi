@@ -48,10 +48,10 @@ export const AuthProvider = ({children}: any) => {
         credencial.email,
         credencial.senha,
       );
-
       const currentUser = auth().currentUser;
 
       if (currentUser?.emailVerified) {
+
         setUserAuth(currentUser);
         await saveCredentials(credencial);
         return 'success';
@@ -108,12 +108,12 @@ export const AuthProvider = ({children}: any) => {
 
   function launchServerMessageErro(e: any): string {
     switch (e.code) {
-      case 'auth/invalid-credential':
-        return 'E-mail ou senha incorreto.';
       case 'auth/user-not-found':
         return 'Usuário não cadastrado.';
-      case 'auth/wrong-password':
-        return 'Senha incorreta.';
+        case 'auth/invalid-credential':
+          return 'E-mail ou senha incorreto.';
+        case 'auth/wrong-password':
+          return 'Senha incorreta.';
       case 'auth/invalid-email':
         return 'E-mail incorreto.';
       case 'auth/user-disabled':
@@ -135,6 +135,7 @@ export const AuthProvider = ({children}: any) => {
         signOut,
         recoverPassword,
         getCredentials,
+        removeCredentials
       }}>
       {children}
     </AuthContext.Provider>
