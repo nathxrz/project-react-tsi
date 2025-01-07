@@ -1,12 +1,17 @@
 import React, {useContext, useState} from 'react';
-import {Alert, Image, ScrollView, StyleSheet, Text} from 'react-native';
+import {Alert, Image, ScrollView, StyleSheet, View} from 'react-native';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
-import {Button, TextInput, useTheme} from 'react-native-paper';
+import {Button, TextInput, useTheme, Dialog, Text} from 'react-native-paper';
 import {Controller, useForm} from 'react-hook-form';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {AuthContext} from '../context/AuthProvider';
 import {User} from '../model/User';
+import {
+  ImageLibraryOptions,
+  launchCamera,
+  launchImageLibrary,
+} from 'react-native-image-picker';
 
 const requiredMessage = 'Campo obrigatório';
 
@@ -52,16 +57,51 @@ export default function SignUp({navigation}: any) {
   const [showPassword, setDisplayPassword] = useState(true);
   const {signUp} = useContext<any>(AuthContext);
   const [requesting, setRequest] = useState(false);
+  const [urlDevice, setUrlDevice] = useState<string | undefined>('');
+  const [message, setMessage] = useState({type: '', message: ''});
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const searchInGallery = () => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+    };
+    launchImageLibrary(options, response => {
+      if (response.errorCode) {
+        setMessage({type: 'erro', message: 'Erro ao buscar a imagem!'});
+      } else if (response.didCancel) {
+        setMessage({type: 'success', message: 'Você cancelou esta ação!'});
+      } else {
+        const path = response.assets?.[0].uri;
+        setUrlDevice(path);
+      }
+    });
+  };
+
+  const takeAPicture = () => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+    };
+    launchCamera(options, response => {
+      if (response.errorCode) {
+        setMessage({type: 'erro', message: 'Erro ao buscar a imagem!'});
+      } else if (response.didCancel) {
+        setMessage({type: 'success', message: 'Você cancelou esta ação!'});
+      } else {
+        const path = response.assets?.[0].uri;
+        setUrlDevice(path);
+      }
+    });
+  };
 
   async function cadastrar(data: User) {
     setRequest(true);
-    const message = await signUp(data);
-    if (message === 'success') {
+    const responseMessage = await signUp(data, urlDevice);
+    if (responseMessage === 'success') {
       setRequest(false);
       navigation.navigate('SignIn');
     } else {
       setRequest(false);
-      Alert.alert('Erro', message);
+      Alert.alert('Erro', responseMessage);
     }
   }
 
@@ -77,6 +117,23 @@ export default function SignUp({navigation}: any) {
             style={styles.image}
             source={require('../assets/images/logo512.png')}
           />
+
+          <View style={styles.divButtonsImage}>
+            <Button
+              style={[styles.buttonImage, styles.borderRadiusBtnRight]}
+              mode="outlined"
+              icon="image"
+              onPress={() => searchInGallery()}>
+              Galeria
+            </Button>
+            <Button
+              style={[styles.buttonImage, styles.borderRadiusBtnLeft]}
+              mode="outlined"
+              icon="camera"
+              onPress={() => takeAPicture()}>
+              Foto
+            </Button>
+          </View>
 
           {/* name  */}
           <Controller
@@ -133,6 +190,7 @@ export default function SignUp({navigation}: any) {
                 style={styles.textinput}
                 autoCapitalize="none"
                 mode="outlined"
+                keyboardType="email-address"
                 label="E-mail"
                 placeholder="Digite seu email"
                 onBlur={onBlur}
@@ -191,6 +249,29 @@ export default function SignUp({navigation}: any) {
           </Button>
         </>
       </ScrollView>
+
+      <Dialog
+        visible={dialogVisible}
+        onDismiss={() => {
+          setDialogVisible(false);
+        }}>
+        <Dialog.Icon
+          icon={
+            message.type === 'success'
+              ? 'checkbox-marked-circle-outline'
+              : 'alert-circle-outline'
+          }
+          size={60}
+        />
+        <Dialog.Title style={styles.textDialog}>
+          {message.type === 'success' ? 'Parabéns' : 'Atenção'}
+        </Dialog.Title>
+        <Dialog.Content>
+          <Text style={styles.textDialog} variant="bodyLarge">
+            {message.message}
+          </Text>
+        </Dialog.Content>
+      </Dialog>
     </SafeAreaView>
   );
 }
@@ -229,5 +310,25 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  divButtonsImage: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+    marginBottom: 20,
+  },
+  buttonImage: {
+    width: 170,
+  },
+  borderRadiusBtnRight: {
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  borderRadiusBtnLeft: {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  textDialog: {
+    textAlign: 'center',
   },
 });

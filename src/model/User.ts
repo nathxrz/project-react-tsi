@@ -3,21 +3,21 @@ export class User {
   public name: string;
   public phone: string;
   public email: string;
-  //   public urlFoto: string;
+    public urlPhoto: string;
   public password: string;
   constructor(
     uid: string,
     name: string,
     phone: string,
     email: string,
-    // urlFoto: string,
+    urlPhoto: string,
     password: string,
   ) {
     this.uid = uid;
     this.name = name;
     this.phone = phone;
     this.email = email;
-    // this.urlFoto = urlFoto;
+    this.urlPhoto = urlPhoto;
     this.password = password;
   }
 }

@@ -1069,6 +1069,11 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
+"@bam.tech/react-native-image-resizer@^3.0.10":
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/@bam.tech/react-native-image-resizer/-/react-native-image-resizer-3.0.11.tgz#b9dc0f155b1293fe6d04944e45b6e3252ca2dea3"
+  integrity sha512-J/vAe51uPhJafT0uAIQI3gziqVs4Tnw32bHau/+I7AukSs4YxLXIaOVF6EChZ9ZFu+fLxvVrRTbHKDf+1YoXag==
+
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
@@ -2065,6 +2070,11 @@
   version "21.5.0"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-21.5.0.tgz#f3b3064476163e6cb7c804d8dd6024d0bc619564"
   integrity sha512-DEey/lLqwHOcbbby8ljV4hgScj2RM6MqxxDAA78jLsD86NZ8VxMxIN+YAug8ayc9akUt1FdJ+FgIbkW1qgJ+KQ==
+
+"@react-native-firebase/storage@21.3.0":
+  version "21.3.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/storage/-/storage-21.3.0.tgz#9081a1540e17605b3d5f040429b3b3e520728994"
+  integrity sha512-L9FXEVT/aao0kflOwd/yexqEsructBUdNoCHy0d3IUX82XR/6bAYVfBoNfRSZe2S+t8LRYZzFLnrh+CG7wDgxQ==
 
 "@react-native/assets-registry@0.75.4":
   version "0.75.4"
@@ -6254,6 +6264,11 @@ react-native-encrypted-storage@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/react-native-encrypted-storage/-/react-native-encrypted-storage-4.0.3.tgz#2a4d65459870511e8f4ccd22f02433dab7fa5e91"
   integrity sha512-0pJA4Aj2S1PIJEbU7pN/Qvf7JIJx3hFywx+i+bLHtgK0/6Zryf1V2xVsWcrD50dfiu3jY1eN2gesQ5osGxE7jA==
+
+react-native-image-picker@^7.2.3:
+  version "7.2.3"
+  resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-7.2.3.tgz#9c402591462af256cdd9aed796c28083a48f90cd"
+  integrity sha512-zKIZUlQNU3EtqizsXSH92zPeve4vpUrsqHu2kkpCxWE9TZhJFZBb+irDsBOY8J21k0+Edgt06TMQGJ+iPUIXyA==
 
 react-native-paper@^5.12.5:
   version "5.12.5"

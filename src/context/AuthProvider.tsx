@@ -1,10 +1,11 @@
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import React, {createContext, useState} from 'react';
-// import EncryptedStorage from 'react-native-encrypted-storage';
 import {Credencial} from '../model/types';
 import {User} from '../model/User';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+import storage from '@react-native-firebase/storage';
 
 export const AuthContext = createContext({});
 
@@ -51,7 +52,7 @@ export const AuthProvider = ({children}: any) => {
       const currentUser = auth().currentUser;
 
       if (currentUser?.emailVerified) {
-        setUserAuth(currentUser);
+        // setUserAuth(currentUser);
         await saveCredentials(credencial);
         return 'success';
       } else {
@@ -63,14 +64,21 @@ export const AuthProvider = ({children}: any) => {
     }
   }
 
-  async function signUp(user: User): Promise<string> {
+  async function signUp(user: User, urlDevice: string): Promise<string> {
     try {
+      if (urlDevice !== '') {
+        user.urlPhoto = await sendImageToStorage(user, urlDevice);
+        if (!user.urlPhoto) {
+          return 'Erro ao atualizar o usuário. Contate o suporte.';
+        }
+      }
       await auth().createUserWithEmailAndPassword(user.email, user.password);
       await auth().currentUser?.sendEmailVerification();
       const usuarioFirestore = {
         name: user.name,
         phone: user.phone,
         email: user.email,
+        urlPhoto: user.urlPhoto,
       };
       await firestore()
         .collection('usuarios')
@@ -80,6 +88,39 @@ export const AuthProvider = ({children}: any) => {
     } catch (e) {
       return launchServerMessageErro(e);
     }
+  }
+
+  async function sendImageToStorage(
+    data: User,
+    urlDevice: string,
+  ): Promise<string> {
+    let resizedImage = await ImageResizer.createResizedImage(
+      urlDevice,
+      150,
+      200,
+      'PNG',
+      80,
+    );
+
+    const pathToStorage = `images/users/${auth().currentUser?.uid}/foto.png`;
+
+    let url: string | null = '';
+    const task = storage().ref(pathToStorage).putFile(resizedImage?.uri);
+    task.on('state_changed', taskSnapshot => {
+      console.log(
+        'Transf:\n' +
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+      );
+    });
+
+    await task.then(async () => {
+      url = await storage().ref(pathToStorage).getDownloadURL();
+    });
+    task.catch(e => {
+      console.error('UserProvider, sendImageToStorage: ' + e);
+      url = null;
+    });
+    return url;
   }
 
   async function signOut(): Promise<string> {

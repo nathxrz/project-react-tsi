@@ -1,7 +1,7 @@
 import {yupResolver} from '@hookform/resolvers/yup';
 import React, {useContext, useEffect, useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Image, ScrollView, StyleSheet} from 'react-native';
+import {Image, ScrollView, StyleSheet, View} from 'react-native';
 import {Button, Dialog, Text, TextInput, useTheme} from 'react-native-paper';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as yup from 'yup';
@@ -9,6 +9,11 @@ import {AuthContext} from '../context/AuthProvider';
 import {User} from '../model/User';
 import {UserContext} from '../context/UserProvider';
 import {CommonActions} from '@react-navigation/native';
+import {
+  ImageLibraryOptions,
+  launchCamera,
+  launchImageLibrary,
+} from 'react-native-image-picker';
 
 const requiredMessage = 'Campo obrigatório';
 
@@ -34,6 +39,7 @@ export default function Profile({navigation}: any) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisibleRemove, setDialogVisibleRemove] = useState(false);
   const [requesting, setRequest] = useState(false);
+  const [urlDevice, setUrlDevice] = useState<string | undefined>('');
 
   const {
     control,
@@ -56,9 +62,41 @@ export default function Profile({navigation}: any) {
     register('phone');
   }, [register]);
 
+  const searchInGallery = () => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+    };
+    launchImageLibrary(options, response => {
+      if (response.errorCode) {
+        setMessage({type: 'erro', message: 'Erro ao buscar a imagem!'});
+      } else if (response.didCancel) {
+        setMessage({type: 'success', message: 'Você cancelou esta ação!'});
+      } else {
+        const path = response.assets?.[0].uri;
+        setUrlDevice(path);
+      }
+    });
+  };
+
+  const takeAPicture = () => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+    };
+    launchCamera(options, response => {
+      if (response.errorCode) {
+        setMessage({type: 'erro', message: 'Erro ao buscar a imagem!'});
+      } else if (response.didCancel) {
+        setMessage({type: 'success', message: 'Você cancelou esta ação!'});
+      } else {
+        const path = response.assets?.[0].uri;
+        setUrlDevice(path);
+      }
+    });
+  };
+
   async function update(data: User) {
     setRequest(true);
-    const updated = await updateUser(data);
+    const updated = await updateUser(data, urlDevice);
     if (updated === 'success') {
       setMessage({type: 'success', message: 'Usuário atualizado com sucesso'});
       setDialogVisible(true);
@@ -99,8 +137,33 @@ export default function Profile({navigation}: any) {
         <>
           <Image
             style={styles.image}
-            source={require('../assets/images/logo512.png')}
+            source={
+              urlDevice
+                ? {uri: urlDevice}
+                : userAuth.urlPhoto
+                ? {uri: userAuth.urlPhoto}
+                : require('../assets/images/person.png')
+            }
+            loadingIndicatorSource={require('../assets/images/person.png')}
           />
+
+          <View style={styles.divButtonsImage}>
+            <Button
+              style={[styles.buttonImage, styles.borderRadiusBtnRight]}
+              mode="outlined"
+              icon="image"
+              onPress={() => searchInGallery()}>
+              Galeria
+            </Button>
+            <Button
+              style={[styles.buttonImage, styles.borderRadiusBtnLeft]}
+              mode="outlined"
+              icon="camera"
+              onPress={() => takeAPicture()}>
+              Foto
+            </Button>
+          </View>
+
           <Controller
             control={control}
             render={({field: {onChange, onBlur, value}}) => (
@@ -242,15 +305,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: 'red',
     borderWidth: 1,
   },
   image: {
-    width: 300,
+    width: 200,
     height: 200,
     alignSelf: 'center',
-    // borderRadius: 200 / 2,
-    marginTop: 100,
+    borderRadius: 200 / 2,
+    borderWidth: 1,
+    borderColor: '#9b9b9b',
+    marginTop: 50,
     marginBottom: 40,
   },
   button: {
@@ -275,5 +339,23 @@ const styles = StyleSheet.create({
   },
   textRemoveAccount: {
     alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
+  divButtonsImage: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+    marginBottom: 20,
+  },
+  buttonImage: {
+    width: 170,
+  },
+  borderRadiusBtnRight: {
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  borderRadiusBtnLeft: {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
   },
 });

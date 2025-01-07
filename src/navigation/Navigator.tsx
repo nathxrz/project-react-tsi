@@ -47,7 +47,7 @@ function AppStack() {
           tabBarLabel: 'Home',
           tabBarIcon: () => (
             <Icon
-              source="account-group"
+              source="home"
               color={theme.colors.primary}
               size={20}
             />
@@ -61,7 +61,7 @@ function AppStack() {
           tabBarLabel: 'Menu',
           tabBarIcon: () => (
             <Icon
-              source="account-group"
+              source="menu"
               color={theme.colors.primary}
               size={20}
             />
