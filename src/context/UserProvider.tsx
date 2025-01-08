@@ -31,6 +31,8 @@ export const UserProvider = ({children}: any) => {
   }
 
   async function updateUser(data: User, urlDevice: string): Promise<string> {
+    console.log('updateUser', data);
+    console.log('urlDevice:', urlDevice);
     try {
       if (urlDevice !== '') {
         data.urlPhoto = await sendImageToStorage(data, urlDevice);
@@ -74,12 +76,6 @@ export const UserProvider = ({children}: any) => {
 
     let url: string | null = '';
     const task = storage().ref(pathToStorage).putFile(resizedImage?.uri);
-    task.on('state_changed', taskSnapshot => {
-      console.log(
-        'Transf:\n' +
-          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-      );
-    });
 
     await task.then(async () => {
       url = await storage().ref(pathToStorage).getDownloadURL();
@@ -94,6 +90,8 @@ export const UserProvider = ({children}: any) => {
   async function removeUser(uid: string): Promise<string> {
     try {
       await firestore().collection('usuarios').doc(uid).delete();
+      const pathStorage = `images/users/${uid}/foto.png`;
+      await storage().ref(pathStorage).delete();
       await auth().currentUser?.delete();
       await removeCredentials();
       return 'success';

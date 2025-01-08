@@ -62,6 +62,12 @@ export default function Profile({navigation}: any) {
     register('phone');
   }, [register]);
 
+  useEffect(() => { 
+    if (userAuth) {
+      setUrlDevice(userAuth.urlPhoto);
+    }
+  }, [userAuth]);
+
   const searchInGallery = () => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',

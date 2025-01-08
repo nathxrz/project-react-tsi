@@ -12,7 +12,9 @@ import SignUp from '../screens/SignUp';
 import Preload from '../screens/Preload';
 import ForgotPassword from '../screens/ForgotPassword';
 import Profile from '../screens/Profile';
+import CatProfile from '../screens/CatProfile';
 import ChangeUserPassword from '../screens/ChangeUserPassword';
+import Cats from '../screens/Cats';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,11 +48,17 @@ function AppStack() {
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: () => (
-            <Icon
-              source="home"
-              color={theme.colors.primary}
-              size={20}
-            />
+            <Icon source="home" color={theme.colors.primary} size={20} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        component={Cats}
+        name="Cats"
+        options={{
+          tabBarLabel: 'Cats',
+          tabBarIcon: () => (
+            <Icon source="cat" color={theme.colors.primary} size={20} />
           ),
         }}
       />
@@ -60,11 +68,7 @@ function AppStack() {
         options={{
           tabBarLabel: 'Menu',
           tabBarIcon: () => (
-            <Icon
-              source="menu"
-              color={theme.colors.primary}
-              size={20}
-            />
+            <Icon source="menu" color={theme.colors.primary} size={20} />
           ),
         }}
       />
@@ -85,6 +89,13 @@ export default function Navigator() {
         }}>
         <Stack.Screen name="AuthStack" component={AuthStack} />
         <Stack.Screen name="AppStack" component={AppStack} />
+        <Stack.Screen
+          component={CatProfile}
+          name="CatProfile"
+          options={{
+            presentation: 'modal',
+          }}
+        />
         <Stack.Screen component={Profile} name="Profile" />
         <Stack.Screen
           component={ChangeUserPassword}

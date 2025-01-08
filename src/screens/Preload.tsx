@@ -39,7 +39,7 @@ export default function Preload({navigation}: any) {
   }
 
   async function goSignIn() {
-    const credencial = await getCredentials();
+    var credencial = await getCredentials();
     if (credencial !== null) {
       const logged = await signIn(credencial);
       if (logged === 'success') {

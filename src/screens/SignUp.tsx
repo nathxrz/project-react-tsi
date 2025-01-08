@@ -93,7 +93,13 @@ export default function SignUp({navigation}: any) {
     });
   };
 
-  async function cadastrar(data: User) {
+  async function onSubmit(data: User) {
+    if (!urlDevice) {
+      Alert.alert('Atenção', 'Selecione uma foto para o perfil');
+      return;
+    }
+    data.urlPhoto =
+      'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
     setRequest(true);
     const responseMessage = await signUp(data, urlDevice);
     if (responseMessage === 'success') {
@@ -115,7 +121,12 @@ export default function SignUp({navigation}: any) {
         <>
           <Image
             style={styles.image}
-            source={require('../assets/images/logo512.png')}
+            source={
+              urlDevice
+                ? {uri: urlDevice}
+                : require('../assets/images/person.png')
+            }
+            loadingIndicatorSource={require('../assets/images/person.png')}
           />
 
           <View style={styles.divButtonsImage}>
@@ -244,7 +255,7 @@ export default function SignUp({navigation}: any) {
             mode="contained"
             loading={requesting}
             disabled={requesting}
-            onPress={handleSubmit(cadastrar)}>
+            onPress={handleSubmit(onSubmit)}>
             {!requesting ? 'Cadastrar-se' : 'Cadastrando'}
           </Button>
         </>
@@ -282,11 +293,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 300,
+    width: 200,
     height: 200,
     alignSelf: 'center',
-    // borderRadius: 200 / 2,
-    marginTop: 10,
+    borderRadius: 200 / 2,
+    borderWidth: 1,
+    borderColor: '#9b9b9b',
+    marginTop: 50,
     marginBottom: 40,
   },
   textinput: {

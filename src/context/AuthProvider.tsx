@@ -66,14 +66,14 @@ export const AuthProvider = ({children}: any) => {
 
   async function signUp(user: User, urlDevice: string): Promise<string> {
     try {
+      await auth().createUserWithEmailAndPassword(user.email, user.password);
+      await auth().currentUser?.sendEmailVerification();
       if (urlDevice !== '') {
         user.urlPhoto = await sendImageToStorage(user, urlDevice);
         if (!user.urlPhoto) {
           return 'Erro ao atualizar o usuário. Contate o suporte.';
         }
       }
-      await auth().createUserWithEmailAndPassword(user.email, user.password);
-      await auth().currentUser?.sendEmailVerification();
       const usuarioFirestore = {
         name: user.name,
         phone: user.phone,
